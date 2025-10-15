@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+tds.log
+
+# Temporary files
+/tmp/
+*.tmp
+*.temp
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Documentation (optional, include if you want)
+*.md
+!README.md
+
+# Lock files (optional)
+uv.lock
+
+# Generated files
+tds-project-1-main/
