@@ -1,0 +1,14 @@
+[project]
+name = "tds-p-1"
+version = "0.1.0"
+description = "Automated GitHub Pages deployment system with LLM code generation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.119.0",
+    "uvicorn>=0.37.0",
+    "pygithub>=2.8.1",
+    "groq>=0.11.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+]

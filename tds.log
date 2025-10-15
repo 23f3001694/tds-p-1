@@ -1,0 +1,109 @@
+2025-10-16 01:14:54 - src.main - INFO - Application starting up
+2025-10-16 01:14:54 - src.main - INFO - Logging to file: /Users/akshitmehta/Development/TDS/tds-p-1/tds.log
+2025-10-16 01:14:54 - src.main - INFO - Logging to file: /Users/akshitmehta/Development/TDS/tds-p-1/tds.log
+2025-10-16 01:15:48 - src.main - INFO - ============================================================
+2025-10-16 01:15:48 - src.main - INFO - Received request: log-file-test (Round 1)
+2025-10-16 01:15:48 - src.main - INFO - ============================================================
+2025-10-16 01:15:48 - src.validator - DEBUG - Validating request data for task: log-file-test
+2025-10-16 01:15:48 - src.validator - DEBUG - Validation passed for task: log-file-test
+2025-10-16 01:15:48 - src.main - DEBUG - Loaded 4 processed requests from storage
+2025-10-16 01:15:48 - src.main - INFO - Request accepted - processing in background
+2025-10-16 01:15:48 - src.main - INFO - ============================================================
+2025-10-16 01:15:48 - src.main - INFO - Processing Task: log-file-test (Round 1)
+2025-10-16 01:15:48 - src.main - INFO - Brief: Create a simple page with logging test...
+2025-10-16 01:15:48 - src.main - INFO - ============================================================
+2025-10-16 01:15:48 - src.main - DEBUG - Initializing clients
+2025-10-16 01:15:48 - src.llm - INFO - CodeGenerator initialized with model: llama-3.3-70b-versatile
+2025-10-16 01:15:48 - src.github - INFO - GitHubClient initialized for user: 23f3001694
+2025-10-16 01:15:48 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): api.github.com:443
+2025-10-16 01:15:49 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /user HTTP/1.1" 200 None
+2025-10-16 01:15:49 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /repos/23f3001694/log-file-test HTTP/1.1" 404 None
+2025-10-16 01:15:49 - src.github - INFO - Creating new repository 'log-file-test'
+2025-10-16 01:15:51 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "POST /user/repos HTTP/1.1" 201 5711
+2025-10-16 01:15:51 - src.github - INFO - Repository created: https://github.com/23f3001694/log-file-test
+2025-10-16 01:15:51 - src.main - INFO - Generating application code with LLM
+2025-10-16 01:15:51 - src.llm - INFO - Generating code for round 1: Create a simple page with logging test...
+2025-10-16 01:15:51 - src.llm - INFO - Decoding 0 attachments
+2025-10-16 01:15:51 - src.llm - DEBUG - Calling Groq API with 755 char prompt
+2025-10-16 01:15:51 - groq._base_client - DEBUG - Request options: {'method': 'post', 'url': '/openai/v1/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-1b991a6d-5212-48d3-970b-b1ddd19f9faf', 'json_data': {'messages': [{'role': 'system', 'content': 'You are an expert web developer. Generate clean, minimal, working HTML/CSS/JS code that meets requirements exactly.'}, {'role': 'user', 'content': 'Create a complete single-page web application.\n\n## Round 1\n\n\n\n## Brief\nCreate a simple page with logging test\n\n## Attachments Available\nNone\n\n## Evaluation Checks\n- Has h1 tag\n\n## Output Requirements\n1. Generate a SINGLE HTML file with inline CSS and JavaScript\n2. The app must be fully functional and meet ALL evaluation checks\n3. Use CDN links for any libraries (Bootstrap, marked, highlight.js, etc.)\n4. After the HTML, add a line "---README---" and then provide a complete README.md\n\n## README.md Must Include\n- Project title and overview\n- Features list\n- How to use\n- Technical details (libraries used, structure)\n- License (MIT)\n\nOutput format:\n```html\n<!DOCTYPE html>\n<html>\n...\n</html>\n---README---\n# Project Title\n...\n```\n\nGenerate the code now:'}], 'model': 'llama-3.3-70b-versatile', 'max_tokens': 8000, 'temperature': 0.3}}
+2025-10-16 01:15:51 - groq._base_client - DEBUG - Sending HTTP Request: POST https://api.groq.com/openai/v1/chat/completions
+2025-10-16 01:15:51 - httpcore.connection - DEBUG - connect_tcp.started host='api.groq.com' port=443 local_address=None timeout=5.0 socket_options=None
+2025-10-16 01:15:51 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060daf90>
+2025-10-16 01:15:51 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x105ed5dd0> server_hostname='api.groq.com' timeout=5.0
+2025-10-16 01:15:51 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060bda30>
+2025-10-16 01:15:51 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-10-16 01:15:51 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-10-16 01:15:51 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-10-16 01:15:51 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-10-16 01:15:51 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-10-16 01:15:52 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Date', b'Wed, 15 Oct 2025 19:45:52 GMT'), (b'Content-Type', b'application/json'), (b'Transfer-Encoding', b'chunked'), (b'Connection', b'keep-alive'), (b'Content-Encoding', b'gzip'), (b'Cache-Control', b'private, max-age=0, no-store, no-cache, must-revalidate'), (b'vary', b'Origin'), (b'x-groq-region', b'bom'), (b'x-ratelimit-limit-requests', b'1000'), (b'x-ratelimit-limit-tokens', b'12000'), (b'x-ratelimit-remaining-requests', b'999'), (b'x-ratelimit-remaining-tokens', b'11763'), (b'x-ratelimit-reset-requests', b'1m26.4s'), (b'x-ratelimit-reset-tokens', b'1.185s'), (b'x-request-id', b'req_01k7mpgkt9fd3vpjcm8qg85jyw'), (b'via', b'1.1 google'), (b'cf-cache-status', b'DYNAMIC'), (b'Set-Cookie', b'__cf_bm=_zS44w6jsWRHTae9YUq3kKpQMz6LgaAt3F5gwoQ_y8w-1760557552-1.0.1.1-LHNZ0z2lPQ.quPkw90f3_dZPnzfKROHBte2rLZ0vg13dcuOqEsa.4Va9GspoVu.izAR4se9fWJHsurnQ3jnQ99tkmS9fnkeNWdBsiIs7Z8I; path=/; expires=Wed, 15-Oct-25 20:15:52 GMT; domain=.groq.com; HttpOnly; Secure; SameSite=None'), (b'Server', b'cloudflare'), (b'CF-RAY', b'98f1d1b80b65a6bc-DEL'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2025-10-16 01:15:52 - httpx - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-16 01:15:52 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-10-16 01:15:52 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-10-16 01:15:52 - httpcore.http11 - DEBUG - response_closed.started
+2025-10-16 01:15:52 - httpcore.http11 - DEBUG - response_closed.complete
+2025-10-16 01:15:52 - groq._base_client - DEBUG - HTTP Response: POST https://api.groq.com/openai/v1/chat/completions "200 OK" Headers({'date': 'Wed, 15 Oct 2025 19:45:52 GMT', 'content-type': 'application/json', 'transfer-encoding': 'chunked', 'connection': 'keep-alive', 'content-encoding': 'gzip', 'cache-control': 'private, max-age=0, no-store, no-cache, must-revalidate', 'vary': 'Origin', 'x-groq-region': 'bom', 'x-ratelimit-limit-requests': '1000', 'x-ratelimit-limit-tokens': '12000', 'x-ratelimit-remaining-requests': '999', 'x-ratelimit-remaining-tokens': '11763', 'x-ratelimit-reset-requests': '1m26.4s', 'x-ratelimit-reset-tokens': '1.185s', 'x-request-id': 'req_01k7mpgkt9fd3vpjcm8qg85jyw', 'via': '1.1 google', 'cf-cache-status': 'DYNAMIC', 'set-cookie': '__cf_bm=_zS44w6jsWRHTae9YUq3kKpQMz6LgaAt3F5gwoQ_y8w-1760557552-1.0.1.1-LHNZ0z2lPQ.quPkw90f3_dZPnzfKROHBte2rLZ0vg13dcuOqEsa.4Va9GspoVu.izAR4se9fWJHsurnQ3jnQ99tkmS9fnkeNWdBsiIs7Z8I; path=/; expires=Wed, 15-Oct-25 20:15:52 GMT; domain=.groq.com; HttpOnly; Secure; SameSite=None', 'server': 'cloudflare', 'cf-ray': '98f1d1b80b65a6bc-DEL', 'alt-svc': 'h3=":443"; ma=86400'})
+2025-10-16 01:15:52 - src.llm - INFO - Generated code using Groq (1742 chars)
+2025-10-16 01:15:52 - src.main - INFO - Committing generated files to repository
+2025-10-16 01:15:52 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /repos/23f3001694/log-file-test/contents/index.html HTTP/1.1" 404 None
+2025-10-16 01:15:53 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "PUT /repos/23f3001694/log-file-test/contents/index.html HTTP/1.1" 201 1701
+2025-10-16 01:15:53 - src.github - INFO - Created index.html in 23f3001694/log-file-test
+2025-10-16 01:15:54 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /repos/23f3001694/log-file-test/contents/README.md HTTP/1.1" 404 None
+2025-10-16 01:15:55 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "PUT /repos/23f3001694/log-file-test/contents/README.md HTTP/1.1" 201 1963
+2025-10-16 01:15:55 - src.github - INFO - Created README.md in 23f3001694/log-file-test
+2025-10-16 01:15:56 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /repos/23f3001694/log-file-test/contents/LICENSE HTTP/1.1" 404 None
+2025-10-16 01:15:57 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "PUT /repos/23f3001694/log-file-test/contents/LICENSE HTTP/1.1" 201 1935
+2025-10-16 01:15:57 - src.github - INFO - Created LICENSE in 23f3001694/log-file-test
+2025-10-16 01:15:57 - src.main - INFO - Committing 0 attachments
+2025-10-16 01:15:57 - src.main - INFO - Enabling GitHub Pages
+2025-10-16 01:15:57 - src.github - DEBUG - Enabling GitHub Pages for log-file-test
+2025-10-16 01:15:57 - httpcore.connection - DEBUG - connect_tcp.started host='api.github.com' port=443 local_address=None timeout=30.0 socket_options=None
+2025-10-16 01:15:57 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060fd220>
+2025-10-16 01:15:57 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x1061199d0> server_hostname='api.github.com' timeout=30.0
+2025-10-16 01:15:57 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060fcec0>
+2025-10-16 01:15:57 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-10-16 01:15:57 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-10-16 01:15:57 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-10-16 01:15:57 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-10-16 01:15:57 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-10-16 01:15:58 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 201, b'Created', [(b'Date', b'Wed, 15 Oct 2025 19:45:58 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'334'), (b'Cache-Control', b'private, max-age=60, s-maxage=60'), (b'Vary', b'Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With'), (b'ETag', b'"ec31fbd03279dacae5ad4dcbbe3fe1e4c857901324dcbd7fe2ed843ce3548880"'), (b'Last-Modified', b'Wed, 15 Oct 2025 19:45:56 GMT'), (b'github-authentication-token-expiration', b'2026-01-13 23:57:06 +0530'), (b'Location', b'https://api.github.com/repos/23f3001694/log-file-test/pages'), (b'X-GitHub-Media-Type', b'github.v3; format=json'), (b'x-accepted-github-permissions', b'pages=write,administration=write'), (b'x-github-api-version-selected', b'2022-11-28'), (b'X-RateLimit-Limit', b'5000'), (b'X-RateLimit-Remaining', b'4946'), (b'X-RateLimit-Reset', b'1760559107'), (b'X-RateLimit-Used', b'54'), (b'X-RateLimit-Resource', b'core'), (b'Access-Control-Expose-Headers', b'ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset'), (b'Access-Control-Allow-Origin', b'*'), (b'Strict-Transport-Security', b'max-age=31536000; includeSubdomains; preload'), (b'X-Frame-Options', b'deny'), (b'X-Content-Type-Options', b'nosniff'), (b'X-XSS-Protection', b'0'), (b'Referrer-Policy', b'origin-when-cross-origin, strict-origin-when-cross-origin'), (b'Content-Security-Policy', b"default-src 'none'"), (b'Server', b'github.com'), (b'X-GitHub-Request-Id', b'7B14:2C802:232B2F:2B4E25:68EFF9F5')])
+2025-10-16 01:15:58 - httpx - INFO - HTTP Request: POST https://api.github.com/repos/23f3001694/log-file-test/pages "HTTP/1.1 201 Created"
+2025-10-16 01:15:58 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-10-16 01:15:58 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-10-16 01:15:58 - httpcore.http11 - DEBUG - response_closed.started
+2025-10-16 01:15:58 - httpcore.http11 - DEBUG - response_closed.complete
+2025-10-16 01:15:58 - httpcore.connection - DEBUG - close.started
+2025-10-16 01:15:58 - httpcore.connection - DEBUG - close.complete
+2025-10-16 01:15:58 - src.github - INFO - GitHub Pages enabled for log-file-test
+2025-10-16 01:15:59 - urllib3.connectionpool - DEBUG - https://api.github.com:443 "GET /repos/23f3001694/log-file-test/commits HTTP/1.1" 200 None
+2025-10-16 01:15:59 - src.github - DEBUG - Latest commit SHA: cbe81cf99128f0b9fd2b97c589a1cbda12f3e545
+2025-10-16 01:15:59 - src.main - INFO - Repository: https://github.com/23f3001694/log-file-test
+2025-10-16 01:15:59 - src.main - INFO - Pages URL: https://23f3001694.github.io/log-file-test/
+2025-10-16 01:15:59 - src.main - INFO - Commit SHA: cbe81cf99128f0b9fd2b97c589a1cbda12f3e545
+2025-10-16 01:15:59 - src.evaluator - INFO - Starting notification to https://webhook.site/test
+2025-10-16 01:15:59 - src.evaluator - DEBUG - Notification attempt 1/5
+2025-10-16 01:15:59 - httpcore.connection - DEBUG - connect_tcp.started host='webhook.site' port=443 local_address=None timeout=30.0 socket_options=None
+2025-10-16 01:15:59 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060fe990>
+2025-10-16 01:15:59 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x10611a0d0> server_hostname='webhook.site' timeout=30.0
+2025-10-16 01:15:59 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x1060fef30>
+2025-10-16 01:15:59 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-10-16 01:15:59 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-10-16 01:15:59 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-10-16 01:15:59 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-10-16 01:15:59 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-10-16 01:16:00 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'server', b'nginx'), (b'content-type', b'text/plain; charset=UTF-8'), (b'transfer-encoding', b'chunked'), (b'x-request-id', b'aac06bb6-a44a-484c-8b3f-c3a47ddf45c7'), (b'x-token-id', b'18aeab2e-fbfb-4b19-a9e0-34fb1998ad81'), (b'cache-control', b'no-cache, private'), (b'date', b'Wed, 15 Oct 2025 19:45:59 GMT')])
+2025-10-16 01:16:00 - httpx - INFO - HTTP Request: POST https://webhook.site/test "HTTP/1.1 200 OK"
+2025-10-16 01:16:00 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-10-16 01:16:00 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-10-16 01:16:00 - httpcore.http11 - DEBUG - response_closed.started
+2025-10-16 01:16:00 - httpcore.http11 - DEBUG - response_closed.complete
+2025-10-16 01:16:00 - httpcore.connection - DEBUG - close.started
+2025-10-16 01:16:00 - httpcore.connection - DEBUG - close.complete
+2025-10-16 01:16:00 - src.evaluator - INFO - Successfully notified evaluation server
+2025-10-16 01:16:00 - src.main - DEBUG - Loaded 4 processed requests from storage
+2025-10-16 01:16:00 - src.main - DEBUG - Saved 5 processed requests to storage
+2025-10-16 01:16:00 - src.main - INFO - ============================================================
+2025-10-16 01:16:00 - src.main - INFO - Completed Task: log-file-test (Round 1)
+2025-10-16 01:16:00 - src.main - INFO - ============================================================
+2025-10-16 01:29:47 - httpcore.connection - DEBUG - close.started
+2025-10-16 01:29:47 - httpcore.connection - DEBUG - close.complete
