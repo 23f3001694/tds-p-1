@@ -66,7 +66,7 @@ The codebase is organized into focused, single-responsibility modules:
 - `EvaluationNotifier`: Sends POST requests with exponential backoff
 
 **Retry Logic:**
-- 5 attempts maximum
+- 10 attempts maximum
 - Delays: 1, 2, 4, 8, 16 seconds (exponential backoff)
 - Only returns success on HTTP 200
 
@@ -220,7 +220,7 @@ Immediate acknowledgment:
 
 **Round 2** (Revision):
 - Uses existing repository
-- Fetches previous README for context
+- Fetches previous README and index.html for context
 - Generates updated code based on new brief
 - Commits updated files
 - Pages already enabled, just updates content
