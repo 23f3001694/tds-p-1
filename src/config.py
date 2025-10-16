@@ -26,6 +26,9 @@ class Config:
     # Groq API configuration for LLM code generation
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     
+    # Gemini API configuration (backup LLM)
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    
     # User secret for request validation
     USER_SECRET: str = os.getenv("USER_SECRET", "")
     
@@ -54,6 +57,8 @@ class Config:
             missing.append("GITHUB_USERNAME")
         if not cls.GROQ_API_KEY:
             missing.append("GROQ_API_KEY")
+        if not cls.GEMINI_API_KEY:
+            logger.warning("GEMINI_API_KEY not set - backup LLM unavailable")
         if not cls.USER_SECRET:
             missing.append("USER_SECRET")
         

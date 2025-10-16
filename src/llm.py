@@ -1,18 +1,21 @@
 """
-LLM code generator using Groq API.
+LLM code generator using Groq API with Gemini backup.
 
 This module handles:
 1. Decoding base64 attachments from data URIs
 2. Generating prompts for the LLM with context about brief, checks, and attachments
-3. Calling Groq API to generate HTML/CSS/JS code
-4. Parsing the response to extract index.html and README.md
+3. Calling Groq API to generate HTML/CSS/JS code (primary)
+4. Falling back to Gemini if Groq fails
+5. Parsing the response to extract index.html and README.md
 """
 
 import base64
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 from groq import Groq
+from google import genai
+from google.genai import types
 
 from .config import Config
 
@@ -89,12 +92,23 @@ class AttachmentDecoder:
 
 
 class CodeGenerator:
-    """Generates web application code using Groq LLM."""
+    """Generates web application code using Groq LLM with Gemini backup."""
     
     def __init__(self):
-        self.client = Groq(api_key=Config.GROQ_API_KEY)
-        self.model = "openai/gpt-oss-120b"
-        logger.info(f"CodeGenerator initialized with model: {self.model}")
+        # Initialize Groq client
+        self.groq_client = Groq(api_key=Config.GROQ_API_KEY)
+        self.groq_model = "openai/gpt-oss-120b"
+        
+        # Initialize Gemini client if API key is available
+        self.gemini_available = bool(Config.GEMINI_API_KEY)
+        if self.gemini_available:
+            self.gemini_client = genai.Client(api_key=Config.GEMINI_API_KEY)
+            self.gemini_model = "gemini-2.5-flash"
+            logger.info(f"CodeGenerator initialized with Groq ({self.groq_model}) + Gemini backup ({self.gemini_model})")
+        else:
+            self.gemini_client = None
+            self.gemini_model = None
+            logger.info(f"CodeGenerator initialized with Groq only ({self.groq_model})")
     
     def generate(
         self,
@@ -127,18 +141,37 @@ class CodeGenerator:
         # Build prompt
         prompt = self._build_prompt(brief, checks, saved_attachments, round_num, prev_readme, prev_html)
         
-        # Log the full prompt for debugging
-        logger.info("="*80)
-        logger.info("PROMPT SENT TO LLM:")
-        logger.info("="*80)
-        logger.info(prompt)
-        logger.info("="*80)
+        # Try Groq first
+        generated_text = self._call_groq(prompt)
         
-        # Call Groq API
+        # If Groq fails, try Gemini
+        if generated_text is None and self.gemini_available:
+            logger.warning("Groq failed, falling back to Gemini")
+            generated_text = self._call_gemini(prompt)
+        
+        # If both fail, use fallback
+        if generated_text is None:
+            logger.error("Both Groq and Gemini failed, using HTML fallback")
+            generated_text = self._fallback_html(brief, checks)
+        
+        # Parse response
+        files = self._parse_response(generated_text, brief, checks, saved_attachments, round_num)
+        files["attachments"] = saved_attachments
+        
+        return files
+    
+    def _call_groq(self, prompt: str) -> Optional[str]:
+        """Call Groq API and return generated text or None on failure."""
         try:
+            logger.info("="*80)
+            logger.info("PROMPT SENT TO GROQ:")
+            logger.info("="*80)
+            logger.info(prompt)
+            logger.info("="*80)
+            
             logger.debug(f"Calling Groq API with {len(prompt)} char prompt")
-            response = self.client.chat.completions.create(
-                model=self.model,
+            response = self.groq_client.chat.completions.create(
+                model=self.groq_model,
                 messages=[
                     {
                         "role": "system",
@@ -150,21 +183,49 @@ class CodeGenerator:
                     }
                 ],
                 temperature=0.3,
-                max_tokens=8000
+                max_tokens=32000
             )
             
             generated_text = response.choices[0].message.content
-            logger.info(f"Generated code using Groq ({len(generated_text)} chars)")
+            logger.info(f"✓ Generated code using Groq ({len(generated_text)} chars)")
+            return generated_text
             
         except Exception as e:
-            logger.error(f"Groq API error: {e}. Using fallback.")
-            generated_text = self._fallback_html(brief, checks)
-        
-        # Parse response
-        files = self._parse_response(generated_text, brief, checks, saved_attachments, round_num)
-        files["attachments"] = saved_attachments
-        
-        return files
+            logger.error(f"✗ Groq API error: {e}")
+            return None
+    
+    def _call_gemini(self, prompt: str) -> Optional[str]:
+        """Call Gemini API and return generated text or None on failure."""
+        try:
+            logger.info("="*80)
+            logger.info("PROMPT SENT TO GEMINI:")
+            logger.info("="*80)
+            logger.info(prompt)
+            logger.info("="*80)
+            
+            logger.debug(f"Calling Gemini API with {len(prompt)} char prompt")
+            
+            # Build full prompt with system message
+            full_prompt = """You are an expert web developer. Generate clean, minimal, working HTML/CSS/JS code that meets requirements exactly.
+
+""" + prompt
+            
+            response = self.gemini_client.models.generate_content(
+                model=self.gemini_model,
+                contents=full_prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.3,
+                    max_output_tokens=32000,
+                )
+            )
+            
+            generated_text = response.text
+            logger.info(f"✓ Generated code using Gemini ({len(generated_text)} chars)")
+            return generated_text
+            
+        except Exception as e:
+            logger.error(f"✗ Gemini API error: {e}")
+            return None
     
     def _build_prompt(
         self,
@@ -320,7 +381,7 @@ Generate the code now:"""
     <div class="container mt-5">
         <h1>Application (Fallback Mode)</h1>
         <div class="alert alert-warning">
-            This is a fallback page generated because the LLM API was unavailable.
+            This is a fallback page generated because the LLM APIs were unavailable.
         </div>
         <h2>Brief</h2>
         <p>{brief}</p>
