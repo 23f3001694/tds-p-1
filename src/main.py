@@ -118,12 +118,16 @@ def process_request_background(data: Dict[str, Any]) -> None:
             description=f"Auto-generated for: {data['brief'][:100]}"
         )
         
-        # Step 2: For round 2, get previous README for context
+        # Step 2: For round 2, get previous README and HTML for context
         prev_readme = None
+        prev_html = None
         if round_num >= 2:
             prev_readme = github.get_readme_content(repo)
+            prev_html = github.get_html_content(repo)
             if prev_readme:
                 logger.info("Loaded previous README for context")
+            if prev_html:
+                logger.info(f"Loaded previous HTML for context ({len(prev_html)} chars)")
         
         # Step 3: Generate application code
         logger.info("Generating application code with LLM")
@@ -132,7 +136,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
             checks=data.get("checks", []),
             attachments=data.get("attachments", []),
             round_num=round_num,
-            prev_readme=prev_readme
+            prev_readme=prev_readme,
+            prev_html=prev_html
         )
         
         files = result

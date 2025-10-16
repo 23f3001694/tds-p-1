@@ -102,7 +102,8 @@ class CodeGenerator:
         checks: List[str],
         attachments: List[Dict[str, str]],
         round_num: int,
-        prev_readme: str = None
+        prev_readme: str = None,
+        prev_html: str = None
     ) -> Dict[str, str]:
         """
         Generate application code based on brief and requirements.
@@ -113,6 +114,7 @@ class CodeGenerator:
             attachments: List of attachment metadata (name, url as data URI)
             round_num: 1 for new app, 2+ for revisions
             prev_readme: Previous README for context (round 2+)
+            prev_html: Previous index.html for context (round 2+)
             
         Returns:
             Dictionary with keys: 'index.html', 'README.md', 'attachments'
@@ -123,7 +125,14 @@ class CodeGenerator:
         saved_attachments = AttachmentDecoder.decode(attachments)
         
         # Build prompt
-        prompt = self._build_prompt(brief, checks, saved_attachments, round_num, prev_readme)
+        prompt = self._build_prompt(brief, checks, saved_attachments, round_num, prev_readme, prev_html)
+        
+        # Log the full prompt for debugging
+        logger.info("="*80)
+        logger.info("PROMPT SENT TO LLM:")
+        logger.info("="*80)
+        logger.info(prompt)
+        logger.info("="*80)
         
         # Call Groq API
         try:
@@ -163,7 +172,8 @@ class CodeGenerator:
         checks: List[str],
         attachments: List[Dict[str, Any]],
         round_num: int,
-        prev_readme: str
+        prev_readme: str = None,
+        prev_html: str = None
     ) -> str:
         """Build the prompt for the LLM."""
         
@@ -178,14 +188,37 @@ class CodeGenerator:
         
         # Build context for round 2
         context = ""
-        if round_num == 2 and prev_readme:
-            context = f"""
+        if round_num == 2 and (prev_readme or prev_html):
+            context = """
 ## Previous Version Context
-The app already exists. Here's the previous README:
-
+The app already exists. Here's what was generated in Round 1:
+"""
+            
+            if prev_readme:
+                context += f"""
+### Previous README:
 {prev_readme}
-
+"""
+            
+            if prev_html:
+                # Truncate HTML if too long (keep first 10000 chars to save tokens)
+                html_preview = prev_html[:10000]
+                if len(prev_html) > 10000:
+                    html_preview += "\n... (truncated for brevity) ..."
+                
+                context += f"""
+### Previous HTML Code:
+```html
+{html_preview}
+```
+"""
+            
+            context += """
 Your task is to UPDATE the existing app based on the new requirements below.
+- Maintain the existing structure and styling where appropriate
+- Add or modify features as requested in the new brief
+- Keep any functionality that's still relevant
+- Improve upon the previous version
 """
         
         return f"""Create a complete single-page web application.

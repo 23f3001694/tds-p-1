@@ -36,7 +36,6 @@ class Config:
     ATTACHMENTS_DIR: Path = Path("/tmp/tds_attachments")
     
     # Log file location
-    # Uses /tmp for cloud hosting (Railway, Render, Fly.io all support /tmp)
     # Set LOG_FILE_PATH env var to override, or None to disable file logging
     LOG_FILE: Path = Path(os.getenv("LOG_FILE_PATH", "/tmp/tds_app.log")) if os.getenv("LOG_FILE_PATH", "/tmp/tds_app.log") else None
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")  # INFO for production, DEBUG for dev

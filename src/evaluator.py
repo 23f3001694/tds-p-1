@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class EvaluationNotifier:
     """Notifies the evaluation server about completed deployments."""
     
-    MAX_RETRIES = 5
+    MAX_RETRIES = 10
     INITIAL_DELAY = 1  # seconds
     
     @staticmethod

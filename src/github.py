@@ -204,6 +204,25 @@ class GitHubClient:
             logger.warning(f"Could not load README.md: {e}")
             return None
     
+    def get_html_content(self, repo: any) -> Optional[str]:
+        """
+        Get content of index.html from repository (for round 2 context).
+        
+        Args:
+            repo: GitHub repository object
+            
+        Returns:
+            HTML content as string or None if not found
+        """
+        try:
+            html_file = repo.get_contents("index.html")
+            content = html_file.decoded_content.decode("utf-8", errors="ignore")
+            logger.info(f"Loaded index.html ({len(content)} chars)")
+            return content
+        except Exception as e:
+            logger.warning(f"Could not load index.html: {e}")
+            return None
+    
     @staticmethod
     def generate_mit_license(owner: str = None) -> str:
         """
