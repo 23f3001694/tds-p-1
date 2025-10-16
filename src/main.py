@@ -95,8 +95,9 @@ def process_request_background(data: Dict[str, Any]) -> None:
     1. Generates code using LLM
     2. Creates/updates GitHub repository
     3. Enables GitHub Pages (round 1)
-    4. Notifies evaluation server
-    5. Saves processed state
+    4. Waits for pages to be deployed and accessible
+    5. Notifies evaluation server
+    6. Saves processed state
     """
     round_num = data["round"]
     task_id = data["task"]
@@ -207,7 +208,14 @@ def process_request_background(data: Dict[str, Any]) -> None:
         # Step 8: Get latest commit SHA
         commit_sha = github.get_latest_commit_sha(repo)
         
-        # Step 9: Prepare notification payload
+        # Step 9: Wait for GitHub Pages to be deployed and accessible
+        logger.info("Waiting for GitHub Pages deployment...")
+        pages_ready = github.wait_for_pages_deployment(pages_url)
+        
+        if not pages_ready:
+            logger.warning("GitHub Pages not confirmed to be live, but proceeding with notification")
+        
+        # Step 10: Prepare notification payload
         payload = {
             "email": data["email"],
             "task": data["task"],
@@ -222,10 +230,10 @@ def process_request_background(data: Dict[str, Any]) -> None:
         logger.info(f"Pages URL: {pages_url}")
         logger.info(f"Commit SHA: {commit_sha}")
         
-        # Step 10: Notify evaluation server
+        # Step 11: Notify evaluation server
         EvaluationNotifier.notify(data["evaluation_url"], payload)
         
-        # Step 11: Save processed state
+        # Step 12: Save processed state
         storage = Storage.load()
         storage[Storage.get_key(data)] = payload
         Storage.save(storage)

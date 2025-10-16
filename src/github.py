@@ -223,6 +223,61 @@ class GitHubClient:
             logger.warning(f"Could not load index.html: {e}")
             return None
     
+    def wait_for_pages_deployment(
+        self,
+        pages_url: str,
+        max_attempts: int = 20,
+        initial_delay: int = 10,
+        retry_delay: int = 5
+    ) -> bool:
+        """
+        Wait for GitHub Pages to be deployed and accessible.
+        
+        Args:
+            pages_url: The GitHub Pages URL to check
+            max_attempts: Maximum number of attempts to check
+            initial_delay: Initial delay before first check (seconds)
+            retry_delay: Delay between subsequent checks (seconds)
+            
+        Returns:
+            True if the page is accessible, False otherwise
+        """
+        import time
+        
+        logger.info(f"Waiting for GitHub Pages deployment at {pages_url}")
+        logger.info(f"Initial delay: {initial_delay}s, then checking every {retry_delay}s (max {max_attempts} attempts)")
+        
+        # Initial delay to allow GitHub to start deployment
+        time.sleep(initial_delay)
+        
+        for attempt in range(max_attempts):
+            try:
+                logger.debug(f"Attempt {attempt + 1}/{max_attempts}: Checking {pages_url}")
+                
+                response = httpx.get(
+                    pages_url,
+                    timeout=10.0,
+                    follow_redirects=True
+                )
+                
+                if response.status_code == 200:
+                    logger.info(f"✓ GitHub Pages is live! (attempt {attempt + 1})")
+                    return True
+                else:
+                    logger.debug(f"Got status {response.status_code}, will retry...")
+            
+            except httpx.TimeoutException:
+                logger.debug(f"Request timed out, will retry...")
+            except Exception as e:
+                logger.debug(f"Request failed: {e}, will retry...")
+            
+            # Don't sleep after the last attempt
+            if attempt < max_attempts - 1:
+                time.sleep(retry_delay)
+        
+        logger.warning(f"GitHub Pages not accessible after {max_attempts} attempts")
+        return False
+    
     @staticmethod
     def generate_mit_license(owner: str = None) -> str:
         """
