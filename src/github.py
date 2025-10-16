@@ -225,57 +225,73 @@ class GitHubClient:
     
     def wait_for_pages_deployment(
         self,
-        pages_url: str,
-        max_attempts: int = 20,
-        initial_delay: int = 10,
+        repo: any,
+        commit_sha: str,
+        max_attempts: int = 30,
         retry_delay: int = 5
     ) -> bool:
         """
-        Wait for GitHub Pages to be deployed and accessible.
+        Wait for GitHub Pages deployment to complete by checking deployment status via API.
+        
+        This is more reliable than polling the URL because:
+        1. GitHub API tells us the exact deployment status
+        2. We can verify it's deploying the correct commit
+        3. No false positives from cached content
         
         Args:
-            pages_url: The GitHub Pages URL to check
-            max_attempts: Maximum number of attempts to check
-            initial_delay: Initial delay before first check (seconds)
-            retry_delay: Delay between subsequent checks (seconds)
+            repo: GitHub repository object
+            commit_sha: The commit SHA that should be deployed
+            max_attempts: Maximum number of attempts to check (default 30 = ~2.5 minutes)
+            retry_delay: Delay between checks in seconds
             
         Returns:
-            True if the page is accessible, False otherwise
+            True if deployment succeeded, False otherwise
         """
         import time
         
-        logger.info(f"Waiting for GitHub Pages deployment at {pages_url}")
-        logger.info(f"Initial delay: {initial_delay}s, then checking every {retry_delay}s (max {max_attempts} attempts)")
-        
-        # Initial delay to allow GitHub to start deployment
-        time.sleep(initial_delay)
+        logger.info(f"Waiting for GitHub Pages deployment of commit {commit_sha[:8]}...")
+        logger.info(f"Checking deployment status every {retry_delay}s (max {max_attempts} attempts)")
         
         for attempt in range(max_attempts):
             try:
-                logger.debug(f"Attempt {attempt + 1}/{max_attempts}: Checking {pages_url}")
+                logger.debug(f"Attempt {attempt + 1}/{max_attempts}: Checking deployment status")
                 
-                response = httpx.get(
-                    pages_url,
-                    timeout=10.0,
-                    follow_redirects=True
-                )
+                # Get all deployments for this repo
+                deployments = repo.get_deployments()
                 
-                if response.status_code == 200:
-                    logger.info(f"✓ GitHub Pages is live! (attempt {attempt + 1})")
-                    return True
-                else:
-                    logger.debug(f"Got status {response.status_code}, will retry...")
+                # Look for pages deployments with our commit SHA
+                for deployment in deployments:
+                    # Check if this is a GitHub Pages deployment for our commit
+                    if deployment.sha == commit_sha and deployment.environment == "github-pages":
+                        # Get the latest status
+                        statuses = deployment.get_statuses()
+                        if statuses.totalCount > 0:
+                            latest_status = statuses[0]
+                            logger.debug(f"Deployment status: {latest_status.state} - {latest_status.description}")
+                            
+                            if latest_status.state == "success":
+                                logger.info(f"✓ GitHub Pages deployment succeeded! (attempt {attempt + 1})")
+                                logger.info(f"Deployment URL: {latest_status.target_url}")
+                                return True
+                            elif latest_status.state == "failure" or latest_status.state == "error":
+                                logger.error(f"✗ GitHub Pages deployment failed: {latest_status.description}")
+                                return False
+                            else:
+                                # Status is pending, queued, or in_progress
+                                logger.debug(f"Deployment still in progress: {latest_status.state}")
+                
+                # If we didn't find a deployment yet, GitHub might still be creating it
+                logger.debug(f"No deployment found yet for commit {commit_sha[:8]}, waiting...")
             
-            except httpx.TimeoutException:
-                logger.debug(f"Request timed out, will retry...")
             except Exception as e:
-                logger.debug(f"Request failed: {e}, will retry...")
+                logger.debug(f"Error checking deployment status: {e}")
             
             # Don't sleep after the last attempt
             if attempt < max_attempts - 1:
                 time.sleep(retry_delay)
         
-        logger.warning(f"GitHub Pages not accessible after {max_attempts} attempts")
+        logger.warning(f"GitHub Pages deployment not confirmed after {max_attempts} attempts")
+        logger.warning("The deployment may still succeed, but we're proceeding with notification")
         return False
     
     @staticmethod

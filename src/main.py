@@ -208,12 +208,12 @@ def process_request_background(data: Dict[str, Any]) -> None:
         # Step 8: Get latest commit SHA
         commit_sha = github.get_latest_commit_sha(repo)
         
-        # Step 9: Wait for GitHub Pages to be deployed and accessible
+        # Step 9: Wait for GitHub Pages deployment to complete
         logger.info("Waiting for GitHub Pages deployment...")
-        pages_ready = github.wait_for_pages_deployment(pages_url)
+        pages_ready = github.wait_for_pages_deployment(repo, commit_sha)
         
         if not pages_ready:
-            logger.warning("GitHub Pages not confirmed to be live, but proceeding with notification")
+            logger.warning("GitHub Pages deployment not confirmed, but proceeding with notification")
         
         # Step 10: Prepare notification payload
         payload = {
