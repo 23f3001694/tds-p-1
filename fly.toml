@@ -4,7 +4,7 @@
 #
 
 app = 'tds-p-1'
-primary_region = 'iad'
+primary_region = 'bom'
 
 [build]
 
