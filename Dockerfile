@@ -22,6 +22,7 @@ RUN uv pip install --system --no-cache \
     uvicorn[standard] \
     pygithub \
     groq \
+    google-genai \
     httpx \
     python-dotenv
 

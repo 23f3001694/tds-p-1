@@ -228,7 +228,7 @@ class GitHubClient:
         repo: any,
         commit_sha: str,
         max_attempts: int = 30,
-        retry_delay: int = 5
+        retry_delay: int = 10
     ) -> bool:
         """
         Wait for GitHub Pages deployment to complete by checking deployment status via API.

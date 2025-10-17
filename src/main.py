@@ -10,6 +10,7 @@ This is the entry point that:
 
 import json
 import logging
+import time
 from typing import Dict, Any
 from pathlib import Path
 from fastapi import FastAPI, Request, BackgroundTasks, HTTPException
@@ -159,6 +160,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
                 content=license_text,
                 message="Add MIT License"
             )
+            logger.debug("Waiting 2s for GitHub to process LICENSE commit...")
+            time.sleep(2)  # Ensure GitHub processes this commit before next one
         
         # Step 5: Commit attachments SECOND (round 1 only)
         if round_num == 1 and saved_attachments:
@@ -186,6 +189,10 @@ def process_request_background(data: Dict[str, Any]) -> None:
                         )
                 except Exception as e:
                     logger.warning(f"Failed to commit attachment {att['name']}: {e}")
+            
+            if saved_attachments:
+                logger.debug("Waiting 2s for GitHub to process attachment commits...")
+                time.sleep(2)  # Ensure all attachments are processed
         
         # Step 6: Commit README.md THIRD
         logger.info("Committing README.md")
@@ -195,6 +202,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
             content=files["README.md"],
             message=f"Generate README.md for round {round_num}"
         )
+        logger.debug("Waiting 2s for GitHub to process README commit...")
+        time.sleep(2)  # Ensure README is processed before enabling Pages
         
         # Step 7: Enable GitHub Pages (round 1 only) - BEFORE committing index.html
         pages_url = f"https://{github.username}.github.io/{task_id}/"
@@ -203,6 +212,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
             pages_ok = github.enable_pages(task_id)
             if not pages_ok:
                 logger.warning("GitHub Pages might not be enabled. Using expected URL anyway.")
+            logger.debug("Waiting 3s for GitHub Pages to be fully enabled...")
+            time.sleep(3)  # Ensure Pages is enabled before final commit
         
         # Step 8: Commit index.html LAST (this triggers the GitHub Pages deployment)
         logger.info("Committing index.html (FINAL - triggers deployment)")
@@ -212,6 +223,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
             content=files["index.html"],
             message=f"Generate index.html for round {round_num}"
         )
+        logger.debug("Waiting 3s for GitHub to register index.html commit...")
+        time.sleep(3)  # Ensure this is the final commit GitHub sees
         
         # Step 9: Get latest commit SHA (should be the index.html commit)
         commit_sha = github.get_latest_commit_sha(repo)

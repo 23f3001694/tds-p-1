@@ -2,6 +2,40 @@
 
 A minimal, modular system that automatically generates web applications using LLM, deploys them to GitHub repositories, enables GitHub Pages, and notifies evaluation servers. Built for the Tools in Data Science (TDS) course.
 
+## 🚀 Live Deployment
+
+**Primary Endpoint (HuggingFace Space):**
+```
+https://amehtaaaaaa-tds-p-1.hf.space/api-endpoint
+```
+
+**Backup Endpoint (Render):**
+```
+https://tds-p-1.onrender.com/api-endpoint
+```
+
+**Health Check:**
+- HF: `https://amehtaaaaaa-tds-p-1.hf.space/`
+- Render: `https://tds-p-1.onrender.com/`
+
+### Quick Test
+
+```bash
+curl -X POST https://amehtaaaaaa-tds-p-1.hf.space/api-endpoint \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your@email.com",
+    "secret": "one_ring_to_rule_them_all",
+    "task": "test-app",
+    "round": 1,
+    "nonce": "test-'$(date +%s)'",
+    "brief": "Create a hello world page",
+    "checks": ["Displays hello world"],
+    "evaluation_url": "https://webhook.site/your-unique-url",
+    "attachments": []
+  }'
+```
+
 ## 🎉 Recent Updates
 
 ### October 17, 2025 (Latest)
