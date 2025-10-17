@@ -163,9 +163,11 @@ def process_request_background(data: Dict[str, Any]) -> None:
             logger.debug("Waiting 2s for GitHub to process LICENSE commit...")
             time.sleep(2)  # Ensure GitHub processes this commit before next one
         
-        # Step 5: Commit attachments SECOND (round 1 only)
-        if round_num == 1 and saved_attachments:
-            logger.info(f"Committing {len(saved_attachments)} attachments")
+        # Step 5: Commit attachments SECOND
+        # GitHub's commit_file automatically handles create vs update
+        # and only creates a new commit if content actually changed
+        if saved_attachments:
+            logger.info(f"Committing {len(saved_attachments)} attachment(s)")
             for att in saved_attachments:
                 att_path = Path(att["path"])
                 try:
@@ -176,7 +178,7 @@ def process_request_background(data: Dict[str, Any]) -> None:
                             repo=repo,
                             path=att["name"],
                             content=content,
-                            message=f"Add attachment {att['name']}"
+                            message=f"Update attachment {att['name']}" if round_num >= 2 else f"Add attachment {att['name']}"
                         )
                     else:
                         # Binary file
@@ -185,14 +187,13 @@ def process_request_background(data: Dict[str, Any]) -> None:
                             repo=repo,
                             path=att["name"],
                             content=content,
-                            message=f"Add binary attachment {att['name']}"
+                            message=f"Update binary attachment {att['name']}" if round_num >= 2 else f"Add binary attachment {att['name']}"
                         )
                 except Exception as e:
                     logger.warning(f"Failed to commit attachment {att['name']}: {e}")
             
-            if saved_attachments:
-                logger.debug("Waiting 2s for GitHub to process attachment commits...")
-                time.sleep(2)  # Ensure all attachments are processed
+            logger.debug("Waiting 2s for GitHub to process attachment commits...")
+            time.sleep(2)  # Ensure all attachments are processed
         
         # Step 6: Commit README.md THIRD
         logger.info("Committing README.md")
