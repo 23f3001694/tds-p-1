@@ -94,10 +94,14 @@ def process_request_background(data: Dict[str, Any]) -> None:
     This function:
     1. Generates code using LLM
     2. Creates/updates GitHub repository
-    3. Enables GitHub Pages (round 1)
-    4. Waits for pages to be deployed and accessible
-    5. Notifies evaluation server
-    6. Saves processed state
+    3. Commits files in correct order (LICENSE → attachments → README → index.html LAST)
+    4. Enables GitHub Pages (round 1)
+    5. Waits for pages deployment to complete
+    6. Notifies evaluation server
+    7. Saves processed state
+    
+    Note: index.html is committed LAST to ensure the deployment verification
+    waits for the correct commit that triggers the GitHub Pages action.
     """
     round_num = data["round"]
     task_id = data["task"]
@@ -144,24 +148,10 @@ def process_request_background(data: Dict[str, Any]) -> None:
         files = result
         saved_attachments = result.get("attachments", [])
         
-        # Step 4: Commit generated files
-        logger.info("Committing generated files to repository")
-        github.commit_file(
-            repo=repo,
-            path="index.html",
-            content=files["index.html"],
-            message=f"Generate index.html for round {round_num}"
-        )
-        
-        github.commit_file(
-            repo=repo,
-            path="README.md",
-            content=files["README.md"],
-            message=f"Generate README.md for round {round_num}"
-        )
-        
-        # Step 5: Commit MIT license (round 1 only, or if missing)
+        # Step 4: Commit MIT license FIRST (round 1 only)
+        # This ensures index.html is committed last to trigger deployment
         if round_num == 1:
+            logger.info("Committing LICENSE")
             license_text = GitHubClient.generate_mit_license()
             github.commit_file(
                 repo=repo,
@@ -170,8 +160,8 @@ def process_request_background(data: Dict[str, Any]) -> None:
                 message="Add MIT License"
             )
         
-        # Step 6: Commit attachments (round 1 only)
-        if round_num == 1:
+        # Step 5: Commit attachments SECOND (round 1 only)
+        if round_num == 1 and saved_attachments:
             logger.info(f"Committing {len(saved_attachments)} attachments")
             for att in saved_attachments:
                 att_path = Path(att["path"])
@@ -197,7 +187,16 @@ def process_request_background(data: Dict[str, Any]) -> None:
                 except Exception as e:
                     logger.warning(f"Failed to commit attachment {att['name']}: {e}")
         
-        # Step 7: Enable GitHub Pages (round 1 only)
+        # Step 6: Commit README.md THIRD
+        logger.info("Committing README.md")
+        github.commit_file(
+            repo=repo,
+            path="README.md",
+            content=files["README.md"],
+            message=f"Generate README.md for round {round_num}"
+        )
+        
+        # Step 7: Enable GitHub Pages (round 1 only) - BEFORE committing index.html
         pages_url = f"https://{github.username}.github.io/{task_id}/"
         if round_num == 1:
             logger.info("Enabling GitHub Pages")
@@ -205,17 +204,27 @@ def process_request_background(data: Dict[str, Any]) -> None:
             if not pages_ok:
                 logger.warning("GitHub Pages might not be enabled. Using expected URL anyway.")
         
-        # Step 8: Get latest commit SHA
-        commit_sha = github.get_latest_commit_sha(repo)
+        # Step 8: Commit index.html LAST (this triggers the GitHub Pages deployment)
+        logger.info("Committing index.html (FINAL - triggers deployment)")
+        github.commit_file(
+            repo=repo,
+            path="index.html",
+            content=files["index.html"],
+            message=f"Generate index.html for round {round_num}"
+        )
         
-        # Step 9: Wait for GitHub Pages deployment to complete
-        logger.info("Waiting for GitHub Pages deployment...")
+        # Step 9: Get latest commit SHA (should be the index.html commit)
+        commit_sha = github.get_latest_commit_sha(repo)
+        logger.info(f"Latest commit SHA: {commit_sha}")
+        
+        # Step 10: Wait for GitHub Pages deployment to complete
+        logger.info(f"Waiting for GitHub Pages deployment of commit {commit_sha[:8]}...")
         pages_ready = github.wait_for_pages_deployment(repo, commit_sha)
         
         if not pages_ready:
             logger.warning("GitHub Pages deployment not confirmed, but proceeding with notification")
         
-        # Step 10: Prepare notification payload
+        # Step 11: Prepare notification payload
         payload = {
             "email": data["email"],
             "task": data["task"],
@@ -230,10 +239,10 @@ def process_request_background(data: Dict[str, Any]) -> None:
         logger.info(f"Pages URL: {pages_url}")
         logger.info(f"Commit SHA: {commit_sha}")
         
-        # Step 11: Notify evaluation server
+        # Step 12: Notify evaluation server
         EvaluationNotifier.notify(data["evaluation_url"], payload)
         
-        # Step 12: Save processed state
+        # Step 13: Save processed state
         storage = Storage.load()
         storage[Storage.get_key(data)] = payload
         Storage.save(storage)
