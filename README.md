@@ -25,7 +25,7 @@ curl -X POST https://amehtaaaaaa-tds-p-1.hf.space/api-endpoint \
   -H "Content-Type: application/json" \
   -d '{
     "email": "your@email.com",
-    "secret": "one_ring_to_rule_them_all",
+    "secret": "secret",
     "task": "test-app",
     "round": 1,
     "nonce": "test-'$(date +%s)'",
