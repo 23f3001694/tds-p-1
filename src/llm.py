@@ -53,9 +53,18 @@ class AttachmentDecoder:
                 mime = header.split(";")[0].replace("data:", "")
                 data = base64.b64decode(b64_data)
                 
+                # Ensure directory exists (important for HuggingFace Spaces)
+                Config.ATTACHMENTS_DIR.mkdir(parents=True, exist_ok=True)
+                
                 # Save to disk
                 path = Config.ATTACHMENTS_DIR / name
+                logger.debug(f"Saving attachment to: {path}")
                 path.write_bytes(data)
+                
+                # Verify file was written
+                if not path.exists():
+                    logger.error(f"File was not created: {path}")
+                    continue
                 
                 # Get preview for text files
                 preview = AttachmentDecoder._get_preview(path, mime)
@@ -67,9 +76,9 @@ class AttachmentDecoder:
                     "size": len(data),
                     "preview": preview
                 })
-                logger.info(f"Decoded attachment: {name} ({mime}, {len(data)} bytes)")
+                logger.info(f"✓ Decoded attachment: {name} ({mime}, {len(data)} bytes) -> {path}")
             except Exception as e:
-                logger.error(f"Failed to decode attachment {name}: {e}")
+                logger.error(f"✗ Failed to decode attachment {name}: {e}", exc_info=True)
         
         return saved
     
@@ -134,6 +143,7 @@ class CodeGenerator:
             Dictionary with keys: 'index.html', 'README.md', 'attachments'
         """
         logger.info(f"Generating code for round {round_num}: {brief[:80]}...")
+        logger.info(f"Received {len(attachments)} attachment(s) to process")
         
         # Decode attachments
         saved_attachments = AttachmentDecoder.decode(attachments)

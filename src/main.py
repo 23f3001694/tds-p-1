@@ -137,6 +137,7 @@ def process_request_background(data: Dict[str, Any]) -> None:
         
         # Step 3: Generate application code
         logger.info("Generating application code with LLM")
+        logger.info(f"Attachments in request: {len(data.get('attachments', []))}")
         result = code_gen.generate(
             brief=data["brief"],
             checks=data.get("checks", []),
@@ -169,11 +170,19 @@ def process_request_background(data: Dict[str, Any]) -> None:
         if saved_attachments:
             logger.info(f"Committing {len(saved_attachments)} attachment(s)")
             for att in saved_attachments:
+                logger.info(f"Processing attachment: {att['name']} ({att['mime']}, {att['size']} bytes)")
                 att_path = Path(att["path"])
+                
+                # Verify file exists before trying to read it
+                if not att_path.exists():
+                    logger.error(f"Attachment file not found: {att_path}")
+                    continue
+                
                 try:
                     if att["mime"].startswith("text") or att_path.suffix in [".csv", ".json", ".txt", ".md"]:
                         # Text file
                         content = att_path.read_text(encoding="utf-8", errors="ignore")
+                        logger.debug(f"Committing text file: {att['name']} ({len(content)} chars)")
                         github.commit_file(
                             repo=repo,
                             path=att["name"],
@@ -183,14 +192,16 @@ def process_request_background(data: Dict[str, Any]) -> None:
                     else:
                         # Binary file
                         content = att_path.read_bytes()
+                        logger.debug(f"Committing binary file: {att['name']} ({len(content)} bytes)")
                         github.commit_binary_file(
                             repo=repo,
                             path=att["name"],
                             content=content,
                             message=f"Update binary attachment {att['name']}" if round_num >= 2 else f"Add binary attachment {att['name']}"
                         )
+                    logger.info(f"✓ Committed attachment: {att['name']}")
                 except Exception as e:
-                    logger.warning(f"Failed to commit attachment {att['name']}: {e}")
+                    logger.error(f"✗ Failed to commit attachment {att['name']}: {e}", exc_info=True)
             
             logger.debug("Waiting 2s for GitHub to process attachment commits...")
             time.sleep(2)  # Ensure all attachments are processed

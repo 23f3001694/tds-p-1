@@ -11,6 +11,7 @@ This module handles all interactions with GitHub:
 from datetime import datetime
 from typing import Optional
 import logging
+import re
 import httpx
 from github import Github, GithubException
 
@@ -47,10 +48,14 @@ class GitHubClient:
         except GithubException as e:
             if e.status == 404:
                 # Repo doesn't exist, create it
+                # Sanitize description to remove control characters/newlines
+                safe_description = self._sanitize_description(description)
                 logger.info(f"Creating new repository '{repo_name}'")
+                logger.debug(f"Original description: {repr(description)}")
+                logger.debug(f"Sanitized description: {repr(safe_description)}")
                 repo = self.user.create_repo(
                     name=repo_name,
-                    description=description,
+                    description=safe_description,
                     private=False,
                     auto_init=False
                 )
@@ -59,6 +64,31 @@ class GitHubClient:
             else:
                 logger.error(f"GitHub API error: {e}")
                 raise
+
+    @staticmethod
+    def _sanitize_description(description: str, max_length: int = 250) -> str:
+        """
+        Remove control characters and collapse whitespace for repository descriptions.
+
+        GitHub rejects descriptions containing control characters (newlines, tabs,
+        etc.). This helper strips those characters, collapses multiple whitespace
+        characters to a single space, trims the result, and enforces a length
+        limit to avoid extremely long descriptions.
+        """
+        if not description:
+            return ""
+
+        # Remove C0 and C1 control characters (0x00-0x1F, 0x7F-0x9F)
+        cleaned = re.sub(r"[\x00-\x1F\x7F-\x9F]", "", description)
+
+        # Collapse any remaining whitespace (newlines, tabs) to single spaces
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+        # Truncate to max_length
+        if len(cleaned) > max_length:
+            cleaned = cleaned[:max_length].rstrip()
+
+        return cleaned
     
     def commit_file(self, repo: any, path: str, content: str, message: str) -> None:
         """
