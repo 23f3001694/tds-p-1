@@ -66,14 +66,14 @@ class GitHubClient:
                 raise
 
     @staticmethod
-    def _sanitize_description(description: str, max_length: int = 250) -> str:
+    def _sanitize_description(description: str, max_length: int = 100) -> str:
         """
         Remove control characters and collapse whitespace for repository descriptions.
 
         GitHub rejects descriptions containing control characters (newlines, tabs,
         etc.). This helper strips those characters, collapses multiple whitespace
         characters to a single space, trims the result, and enforces a length
-        limit to avoid extremely long descriptions.
+        limit to avoid extremely long descriptions (default: 100 chars).
         """
         if not description:
             return ""
