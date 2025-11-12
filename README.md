@@ -1,4 +1,4 @@
-# TDS Project 1 - Automated GitHub Pages Deployment System
+# Automated GitHub Pages Deployment System
 
 A minimal, modular system that automatically generates web applications using LLM, deploys them to GitHub repositories, enables GitHub Pages, and notifies evaluation servers. Built for the Tools in Data Science (TDS) course.
 
